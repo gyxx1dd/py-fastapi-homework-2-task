@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import math
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func, insert
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 from starlette import status
 
 import schemas
@@ -70,9 +69,8 @@ async def movie_create(movie_data: schemas.movies.MovieCreate, db: AsyncSession 
             detail="Invalid input data."
         )
 
-    movie_year = movie_data.date.year
 
-    if movie_year > datetime.now().year:
+    if movie_data.date > (datetime.now() + timedelta(days=365)).date():
         raise HTTPException(
             status_code=400,
             detail="Invalid input data."
@@ -201,13 +199,13 @@ async def movie_update(movie_id: int, data: schemas.movies.MovieUpdate, db: Asyn
             detail="Movie with the given ID was not found."
         )
 
-    if data.score is not None and data.budget is not None:
+    if data.score is not None:
         if data.score > 100 or data.score < 0:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid input data."
             )
-
+    if data.budget is not None:
         if data.budget < 0 or data.revenue < 0:
             raise HTTPException(
                 status_code=400,
