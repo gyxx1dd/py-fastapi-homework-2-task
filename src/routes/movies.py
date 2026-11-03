@@ -69,7 +69,6 @@ async def movie_create(movie_data: schemas.movies.MovieCreate, db: AsyncSession 
             detail="Invalid input data."
         )
 
-
     if movie_data.date > (datetime.now() + timedelta(days=365)).date():
         raise HTTPException(
             status_code=400,
